@@ -1,0 +1,141 @@
+---
+title: "Basic Modeling Practice"
+format: html
+editor: visual
+---
+
+# Basic Modeling Practice
+
+## Read Data and Library Setup
+
+```{r}
+
+library(readr)
+library(lubridate)
+library(tidyverse)
+
+raw_data = read.csv("SeoulBikeData_mod.csv", check.names = F, header = TRUE)
+
+```
+
+## Exploratory Data Analysis
+
+1.  Check for Missing Data
+
+```{r}
+colSums(is.na(raw_data))
+```
+
+**Narrative** The expression colSums(is.na(bike_data)) forms row and column sums and means for data frames. Here, there are no missing values, which checks with the website that there is no missing data.
+**End Narrative**
+
+2.  Check the column types and the values within the columns to make sure they make sense (basic summary stats for numeric columns and check the unique values for the categorical variables).
+
+```{r}
+
+str(raw_data)
+
+#Summary Stats for Numeric Variables
+raw_data |>
+  summarise(across(where(is.numeric),list(mean=mean,std=sd,med = median))) |>
+  pivot_longer(cols = everything(), 
+               names_to = c('col', '.value'), 
+               names_sep = '_')
+
+#1-way Contingency Tables
+cat("1-way Contingency Table for Seasons", "\n")
+table(raw_data$Seasons)
+cat("\n")
+
+#1-way Contingency Tables
+cat("1-way Contingency Table for Holidays", "\n")
+table(raw_data$Holiday)
+cat("\n")
+
+
+#1-way Contingency Tables
+cat("1-way Contingency Table for Functioning Day", "\n")
+table(raw_data$`Functioning Day`)
+cat("\n")
+
+
+
+```
+
+**Narrative** The basic numeric summary above shows
+
+*Rented Bike Count* is approximately 700 / hour on average, with a standard deviation of 645, and a median of 505, which suggest that RBC is skewed right slightly.
+
+*Hour* has an average of somewhere around 11:30 AM, which seems reasonable and the mean is about the same as the median, which means skewness should not be an issue.
+
+*Temperature* average of 12.8C might be reasonable for Seoul Korea. The standard deviation is almost the same as the mean, which suggests a large spread.
+
+*Humidity* has a mean of 58% with a standard deviation of 20 and a median of 57 suggests skewness should not be an issue.
+
+*Windspeed* standard deviation would imply some wind speeds below zero, so some kind of transformation might be necessary there.
+
+*Visibility* has a mean of 1400 and standard deviation of 608, with a median of nearly 1700. This suggests there is some skew to the left with Visibility.
+
+*Dew Point Temperature* has a mean of 4 with a standard deviation of 13 and a median of 5, suggesting a fairly symmetrical distribution.
+
+*Solar Radiation* has a mean of 0.569 and sd of 0.868 and med of 0.01.  This is apparently a distribution that is highly skewed to the right.
+
+*Rainfall* shows a mean of 0.148 mm because many days there is no rainfall.  Is this an example of a zero inflated distribution?
+
+*Snowfall* I think is similar because so many days there is no snowfall.
+
+**End Narrative**
+
+3.  Convert the Date column into an actual date (if need be). Recall the lubridate package.
+
+4.  Turn the character variables (Seasons, Holiday, and Functioning Day) into factors.
+
+5.  Lastly, rename all the variables to have easy to use names (I use lower snake case but whatever you’d like is fine)
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(forcats)
+
+bike_data <- 
+  raw_data |>
+  rename(
+    DATE = `Date`,
+    RBC = `Rented Bike Count`,
+    HOUR = `Hour`,
+    "TEMP(deg C)" = `Temperature`,
+    "RH(%)" = `Humidity(%)`,
+    "WD_SPD(m/s)" = `Wind speed (m/s)`,
+    "VIS(10m)" = `Visibility (10m)`,
+    "DP_TEMP(deg C)" = `Dew point temperature`,
+    "SOL_RAD(MJ/m2)" = `Solar Radiation (MJ/m2)`,
+    "RAIN_FALL(mm)" = `Rainfall(mm)`,
+    "SNOW_FALL(cm)" = `Snowfall (cm)`,
+    SEASONS = `Seasons`,
+    HOLIDAY = `Holiday`,
+    FUNC_DAY = `Functioning Day`
+  ) |>
+  mutate(
+    DATE = dmy(DATE),
+    HOLIDAY = as_factor(HOLIDAY),
+    SEASONS = as_factor(SEASONS),
+    FUNC_DAY = as_factor(FUNC_DAY)
+  )
+
+write.csv(bike_data, "bike_data.csv")
+```
+
+**Narrative** I had to remove the degrees symbol from the Temperature columns to rename the columns. I did that in Excel. I decided to use all caps for the names of the columns because of all the continuous variables, which I personally like to use abbreviations with capitals for continuous variables. I used dplyr and mutate to rename the columns with rename and to change date from character to date and the other character variables to factors.
+
+6.  Create summary statistics (especially related to the bike rental count). These should be done across your categorical variables as well. You should notice something about the Functioning Day variable. Subset the data appropriately based on that.
+```{r}
+#2-way Contingency Table for Holiday and Functioning Day
+cat("2-way Contingency Table for Holiday and Functioning Day", "\n")
+table(bike_data$HOLIDAY, bike_data$FUNC_DAY)
+cat("\n")
+```
+
+
+7.  To simplify our analysis, we’ll summarize across the hours so that each day has one observation associated with it. • (I’m using my new names here. Your names may not match and that’s ok!) Let’s group_by() the date, seasons, and holiday variables. • Find the sum of the bike_count, rainfall, and snowfall variables • Find the mean of all the weather related variables. • This will be our new data that we’ll analyze!
+
+8.  Recreate your basic summary stats and then create some plots to explore relationships. Report correlation between your numeric variables as well.
