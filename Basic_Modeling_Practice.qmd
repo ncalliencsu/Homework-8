@@ -4,8 +4,6 @@ format: html
 editor: visual
 ---
 
-# Basic Modeling Practice
-
 ## Read Data and Library Setup
 
 ```{r}
@@ -342,10 +340,9 @@ The Correlation Table indicates a positive correlation between Daily Bike Rental
 
 ## Split the Data
 
-Use functions from tidymodels to split the data into a training and test set (75/25 split). Use the strata argument to stratify the split on the seasons variable. • On the training set, create a 10 fold CV split. 
+Use functions from tidymodels to split the data into a training and test set (75/25 split). Use the strata argument to stratify the split on the seasons variable. • On the training set, create a 10 fold CV split.
 
-The code splits the dataset bd_sub into training and test sets using tidymodels in R. initial_split(bd_sub, prop = 3/4, strata = SEASONS): Splits bd_sub so that 75% goes to training and 25% to testing, while preserving the distribution of SEASONS.  
-
+The code splits the dataset bd_sub into training and test sets using tidymodels in R. initial_split(bd_sub, prop = 3/4, strata = SEASONS): Splits bd_sub so that 75% goes to training and 25% to testing, while preserving the distribution of SEASONS.
 
 ```{r}
 library(tidymodels)
@@ -395,8 +392,8 @@ write.csv(recipe1_baked, "recipe1_baked.csv")
 
 ```
 
-For the 2nd recipe:  
-• Do the same steps as above.  
+For the 2nd recipe:\
+• Do the same steps as above.\
 • Add in interactions between seasons and holiday, seasons and temp, temp and rainfall. For the seasons interactions, you can use starts_with() to create the proper interactions.
 
 ```{r}
@@ -425,9 +422,10 @@ write.csv(recipe2_baked, "recipe2_baked.csv")
 
 ```
 
-For the 3rd recipe:  
-• Do the same as the 2nd recipe.  
+For the 3rd recipe:\
+• Do the same as the 2nd recipe.\
 • Add in quadratic terms for each numeric predictor
+
 ```{r}
 #Define Recipe 3
 
@@ -454,7 +452,8 @@ recipe3_baked <- bake(recipe3_prep, new_data = bike_test_data)
 write.csv(recipe3_baked, "recipe3_baked.csv")
 ```
 
-### Set Up Linear Model Object  
+### Set Up Linear Model Object
+
 ```{r}
 bike_model <- linear_reg() |>
 set_engine("lm")
@@ -463,9 +462,10 @@ set_engine("lm")
 
 ### Fit Models using 10 fold CV via fit_resamples().
 
-Consider the training set CV error to choose a best model.  fit_resamples() uses resampling (e.g., cross-validation, bootstrapping) to estimate model performance. Trains and evaluates the model on multiple splits of the training data. It is used for model selection, tuning, and understanding generalization.
+Consider the training set CV error to choose a best model. fit_resamples() uses resampling (e.g., cross-validation, bootstrapping) to estimate model performance. Trains and evaluates the model on multiple splits of the training data. It is used for model selection, tuning, and understanding generalization.
 
 In tidymodels (R), workflow() creates a modeling workflow object that combines preprocessing (recipe or formula) and a model specification. It helps organize the steps of the machine learning pipeline.
+
 ```{r}
 
 bike_CV_fit1 <- workflow() |>
@@ -485,9 +485,11 @@ bike_CV_fit3 <- workflow() |>
 
 
 ```
-bike_CV_fit1,2,3 contain the results of cross-validation, using the workflow function.  I do not have a good answer as why I am getting warnings on rank-deficiency for Recipes 2 & 3. There is some collinearity in the interactions which is not jumping out at me.
+
+bike_CV_fit1,2,3 contain the results of cross-validation, using the workflow function. I do not have a good answer as why I am getting warnings on rank-deficiency for Recipes 2 & 3. There is some collinearity in the interactions which is not jumping out at me.
 
 ### Collect Metrics on the CV Models
+
 ```{r}
 
 rbind(bike_CV_fit1 |> collect_metrics(),
@@ -501,6 +503,7 @@ rbind(bike_CV_fit1 |> collect_metrics(),
 ### Compute the RMSE on the Test Set
 
 Recipe 2 has the lowest RMSE, so I will use this to make the final model. last_fit() is for final model evaluation, not for tuning or resampling. It gives a realistic estimate of model performance on new data.
+
 ```{r}
 
 final_model <- workflow() |>
@@ -510,11 +513,13 @@ final_model <- workflow() |>
 
 final_model |> collect_metrics()
 ```
-RMSE for Model 2 on the entire training set is 4953, which is a good sign because it is considerably lower than the RMSE from the Cross-Validation. 
+
+RMSE for Model 2 on the entire training set is 4953, which is a good sign because it is considerably lower than the RMSE from the Cross-Validation.
 
 ### Obtain the Final Model Coefficient Table
 
 Use extract_fit_parsnip() and tidy().
+
 ```{r}
 
 final_model |> 
@@ -522,13 +527,11 @@ final_model |>
   tidy()
 
 ```
-From inspection of the p value column, we see the following parameters are statistically significant at the 5% significance level:  
 
-* `SUM_RAIN_FALL(mm)`
-* `SOL_RAD(MJ/m2)_MEAN`
-* SEASONS
-* DAY_TYPE
-* `SEASONS x_TEMP(deg C)_MEAN`
+From inspection of the p value column, we see the following parameters are statistically significant at the 5% significance level:
 
-
-
+-   `SUM_RAIN_FALL(mm)`
+-   `SOL_RAD(MJ/m2)_MEAN`
+-   `SEASONS`
+-   `DAY_TYPE`
+-   `SEASONS x_TEMP(deg C)_MEAN`

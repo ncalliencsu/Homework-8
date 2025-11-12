@@ -135,8 +135,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="basic-modeling-practice" class="level1">
-<h1>Basic Modeling Practice</h1>
 <section id="read-data-and-library-setup" class="level2">
 <h2 class="anchored" data-anchor-id="read-data-and-library-setup">Read Data and Library Setup</h2>
 <div class="cell">
@@ -639,7 +637,7 @@ the `.groups` argument.</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Basic-Modeling-Practice_files/figure-html/Graphical Analysis for Subset-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Basic_Modeling_Practice_files/figure-html/Graphical Analysis for Subset-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -651,7 +649,7 @@ the `.groups` argument.</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Basic-Modeling-Practice_files/figure-html/Graphical Analysis for Subset-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Basic_Modeling_Practice_files/figure-html/Graphical Analysis for Subset-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -663,7 +661,7 @@ the `.groups` argument.</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Basic-Modeling-Practice_files/figure-html/Graphical Analysis for Subset-3.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Basic_Modeling_Practice_files/figure-html/Graphical Analysis for Subset-3.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -675,7 +673,7 @@ the `.groups` argument.</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Basic-Modeling-Practice_files/figure-html/Graphical Analysis for Subset-4.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Basic_Modeling_Practice_files/figure-html/Graphical Analysis for Subset-4.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -685,7 +683,7 @@ the `.groups` argument.</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Basic-Modeling-Practice_files/figure-html/Graphical Analysis for Subset-5.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Basic_Modeling_Practice_files/figure-html/Graphical Analysis for Subset-5.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -695,7 +693,7 @@ the `.groups` argument.</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Basic-Modeling-Practice_files/figure-html/Graphical Analysis for Subset-6.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Basic_Modeling_Practice_files/figure-html/Graphical Analysis for Subset-6.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -741,7 +739,7 @@ SOL_RAD(MJ/m2)_MEAN           0.3774974           1.0000000</code></pre>
 <p>The Scatterplot of Daily Bike Rentals vs.&nbsp;Date reveals the seasonality we would expect, with peak demand in the summer and the lowest demand in the winter. There are some days where no rentals are present.</p>
 <p>The Scatterplot of Windspeed vs.&nbsp;Date seems to reveal slightly higher windspeeds in the winter and spring. The Scatterplot of Temperature vs.&nbsp;Date also seems to be as expected with seasonality.</p>
 <p>The Scatterplot of RH over Date was somewhat surprising. There does not seem to be any seasonality present with RH in Seoul. The Boxplot of Daily Bike Rentals vs.&nbsp;Holiday clearly shows the bikes are used for getting to work.</p>
-<p>The Correlation Table indicates a positive correlation between Daily Bike Rentals and Temperature, Dew Point and Temperature. There is a strong positive correlation between Temperature and Dew Point Temperature. There seems to be a moderate postive correlation between Dew Point Temperature and Relative Humidity.</p>
+<p>The Correlation Table indicates a positive correlation between Daily Bike Rentals and Temperature, Dew Point Temperature and Solar Radiation. There is a strong positive correlation between Temperature and Dew Point Temperature. There seems to be a moderate positive correlation between Dew Point Temperature and Relative Humidity.</p>
 </section>
 <section id="split-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="split-the-data">Split the Data</h2>
@@ -799,7 +797,7 @@ SOL_RAD(MJ/m2)_MEAN           0.3774974           1.0000000</code></pre>
 <span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a>        DATE_dow <span class="sc">==</span> <span class="st">"Sat"</span> <span class="sc">|</span> DATE_dow <span class="sc">==</span> <span class="st">"Sun"</span>, <span class="st">"WKEND"</span>, <span class="st">"WKDAY"</span>))) <span class="sc">|&gt;</span></span>
 <span id="cb93-9"><a href="#cb93-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(DATE_dow, DATE) <span class="sc">|&gt;</span></span>
 <span id="cb93-10"><a href="#cb93-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb93-11"><a href="#cb93-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(SEASONS, HOLIDAY, DAY_TYPE)</span>
+<span id="cb93-11"><a href="#cb93-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>())</span>
 <span id="cb93-12"><a href="#cb93-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb93-13"><a href="#cb93-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb93-14"><a href="#cb93-14" aria-hidden="true" tabindex="-1"></a>recipe1_prep <span class="ot">&lt;-</span> <span class="fu">prep</span>(recipe1, <span class="at">training =</span> bike_train_data)</span>
@@ -823,7 +821,7 @@ SOL_RAD(MJ/m2)_MEAN           0.3774974           1.0000000</code></pre>
 <span id="cb94-10"><a href="#cb94-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(DATE_dow, DATE) <span class="sc">|&gt;</span></span>
 <span id="cb94-11"><a href="#cb94-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span></span>
 <span id="cb94-12"><a href="#cb94-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb94-13"><a href="#cb94-13" aria-hidden="true" tabindex="-1"></a> <span class="fu">step_interact</span>(</span>
+<span id="cb94-13"><a href="#cb94-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_interact</span>(</span>
 <span id="cb94-14"><a href="#cb94-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">terms =</span> <span class="sc">~</span> <span class="fu">starts_with</span>(<span class="st">"HOLIDAY"</span>)<span class="sc">:</span><span class="fu">starts_with</span>(<span class="st">"SEASONS"</span>) <span class="sc">+</span></span>
 <span id="cb94-15"><a href="#cb94-15" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">TEMP(deg C)_MEAN</span><span class="st">`</span><span class="sc">:</span><span class="fu">starts_with</span>(<span class="st">"SEASONS"</span>) <span class="sc">+</span></span>
 <span id="cb94-16"><a href="#cb94-16" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">TEMP(deg C)_MEAN</span><span class="st">`</span><span class="sc">:</span><span class="st">`</span><span class="at">SUM_RAIN_FALL(mm)</span><span class="st">`</span></span>
@@ -838,27 +836,29 @@ SOL_RAD(MJ/m2)_MEAN           0.3774974           1.0000000</code></pre>
 • Do the same as the 2nd recipe.<br>
 • Add in quadratic terms for each numeric predictor</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>recipe3 <span class="ot">&lt;-</span> </span>
-<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">recipe</span>(SUM_RBC <span class="sc">~</span> ., <span class="at">data =</span> bike_train_data) <span class="sc">|&gt;</span> </span>
-<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_date</span>(DATE, <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"dow"</span>)) <span class="sc">|&gt;</span>              </span>
-<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_mutate</span>(</span>
-<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">DAY_TYPE =</span> <span class="fu">factor</span>(</span>
-<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(</span>
-<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>        DATE_dow <span class="sc">==</span> <span class="st">"Sat"</span> <span class="sc">|</span> DATE_dow <span class="sc">==</span> <span class="st">"Sun"</span>, <span class="st">"WKEND"</span>, <span class="st">"WKDAY"</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(DATE_dow, DATE) <span class="sc">|&gt;</span></span>
-<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_poly</span>(<span class="fu">all_numeric_predictors</span>(), <span class="at">degree =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
-<span id="cb95-11"><a href="#cb95-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb95-12"><a href="#cb95-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_interact</span>(</span>
-<span id="cb95-13"><a href="#cb95-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">terms =</span> <span class="sc">~</span> <span class="fu">starts_with</span>(<span class="st">"HOLIDAY"</span>)<span class="sc">:</span><span class="fu">starts_with</span>(<span class="st">"SEASONS"</span>) <span class="sc">+</span></span>
-<span id="cb95-14"><a href="#cb95-14" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">TEMP(deg C)_MEAN_poly_1</span><span class="st">`</span><span class="sc">:</span><span class="fu">starts_with</span>(<span class="st">"SEASONS"</span>) <span class="sc">+</span></span>
-<span id="cb95-15"><a href="#cb95-15" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">TEMP(deg C)_MEAN_poly_1</span><span class="st">`</span><span class="sc">:</span><span class="st">`</span><span class="at">SUM_RAIN_FALL(mm)_poly_1</span><span class="st">`</span></span>
-<span id="cb95-16"><a href="#cb95-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb95-17"><a href="#cb95-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb95-18"><a href="#cb95-18" aria-hidden="true" tabindex="-1"></a>recipe3_prep <span class="ot">&lt;-</span> <span class="fu">prep</span>(recipe3, <span class="at">training =</span> bike_train_data)</span>
-<span id="cb95-19"><a href="#cb95-19" aria-hidden="true" tabindex="-1"></a>recipe3_baked <span class="ot">&lt;-</span> <span class="fu">bake</span>(recipe3_prep, <span class="at">new_data =</span> bike_test_data)  </span>
-<span id="cb95-20"><a href="#cb95-20" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb95-21"><a href="#cb95-21" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(recipe3_baked, <span class="st">"recipe3_baked.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Define Recipe 3</span></span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>recipe3 <span class="ot">&lt;-</span> </span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">recipe</span>(SUM_RBC <span class="sc">~</span> ., <span class="at">data =</span> bike_train_data) <span class="sc">|&gt;</span> </span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_date</span>(DATE, <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"dow"</span>)) <span class="sc">|&gt;</span>              </span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_mutate</span>(</span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">DAY_TYPE =</span> <span class="fu">factor</span>(</span>
+<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(</span>
+<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a>        DATE_dow <span class="sc">==</span> <span class="st">"Sat"</span> <span class="sc">|</span> DATE_dow <span class="sc">==</span> <span class="st">"Sun"</span>, <span class="st">"WKEND"</span>, <span class="st">"WKDAY"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(DATE_dow, DATE) <span class="sc">|&gt;</span></span>
+<span id="cb95-11"><a href="#cb95-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb95-12"><a href="#cb95-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_poly</span>(<span class="fu">all_numeric_predictors</span>(), <span class="at">degree =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb95-13"><a href="#cb95-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb95-14"><a href="#cb95-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_interact</span>(</span>
+<span id="cb95-15"><a href="#cb95-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">terms =</span> <span class="sc">~</span> <span class="fu">starts_with</span>(<span class="st">"HOLIDAY"</span>)<span class="sc">:</span><span class="fu">starts_with</span>(<span class="st">"SEASONS"</span>) <span class="sc">+</span></span>
+<span id="cb95-16"><a href="#cb95-16" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">TEMP(deg C)_MEAN_poly_1</span><span class="st">`</span><span class="sc">:</span><span class="fu">starts_with</span>(<span class="st">"SEASONS"</span>) <span class="sc">+</span></span>
+<span id="cb95-17"><a href="#cb95-17" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">TEMP(deg C)_MEAN_poly_1</span><span class="st">`</span><span class="sc">:</span><span class="st">`</span><span class="at">SUM_RAIN_FALL(mm)_poly_1</span><span class="st">`</span></span>
+<span id="cb95-18"><a href="#cb95-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb95-19"><a href="#cb95-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-20"><a href="#cb95-20" aria-hidden="true" tabindex="-1"></a>recipe3_prep <span class="ot">&lt;-</span> <span class="fu">prep</span>(recipe3, <span class="at">training =</span> bike_train_data)</span>
+<span id="cb95-21"><a href="#cb95-21" aria-hidden="true" tabindex="-1"></a>recipe3_baked <span class="ot">&lt;-</span> <span class="fu">bake</span>(recipe3_prep, <span class="at">new_data =</span> bike_test_data)  </span>
+<span id="cb95-22"><a href="#cb95-22" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb95-23"><a href="#cb95-23" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(recipe3_baked, <span class="st">"recipe3_baked.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="set-up-linear-model-object" class="level3">
@@ -907,10 +907,10 @@ There were issues with some computations   A: x1</code></pre>
 <pre><code></code></pre>
 </div>
 </div>
-<p>bike_CV_fit1,2,3 contain the results of cross-validation, using the workflow function.</p>
+<p>bike_CV_fit1,2,3 contain the results of cross-validation, using the workflow function. I do not have a good answer as why I am getting warnings on rank-deficiency for Recipes 2 &amp; 3. There is some collinearity in the interactions which is not jumping out at me.</p>
 </section>
-<section id="collect-metrics-on-the-models" class="level3">
-<h3 class="anchored" data-anchor-id="collect-metrics-on-the-models">Collect Metrics on the Models</h3>
+<section id="collect-metrics-on-the-cv-models" class="level3">
+<h3 class="anchored" data-anchor-id="collect-metrics-on-the-cv-models">Collect Metrics on the CV Models</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(bike_CV_fit1 <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>(),</span>
 <span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>      bike_CV_fit2 <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>(),</span>
@@ -975,9 +975,16 @@ There were issues with some computations   A: x1</code></pre>
 # ℹ 11 more rows</code></pre>
 </div>
 </div>
+<p>From inspection of the p value column, we see the following parameters are statistically significant at the 5% significance level:</p>
+<ul>
+<li><code>SUM_RAIN_FALL(mm)</code></li>
+<li><code>SOL_RAD(MJ/m2)_MEAN</code></li>
+<li><code>SEASONS</code></li>
+<li><code>DAY_TYPE</code></li>
+<li><code>SEASONS x_TEMP(deg C)_MEAN</code></li>
+</ul>
 
 
-</section>
 </section>
 </section>
 
