@@ -225,7 +225,7 @@ bd_sub <- bike_data |>
             SUM_RBC = sum(RBC),
             "SUM_RAIN_FALL(mm)" = sum(`RAIN_FALL(mm)`),
             "SUM_SNOW_FALL(cm)" = sum(`SNOW_FALL(cm)`),) |>
-            select(DATE, SEASONS, HOLIDAY, starts_with("SUM"), everything(), -RBC_MEAN, -HOUR_MEAN)
+            select(DATE, SEASONS, HOLIDAY, starts_with("SUM"), everything(), -RBC_MEAN, -HOUR_MEAN, -`RAIN_FALL(mm)_MEAN`, -`SNOW_FALL(cm)_MEAN`)
                         
 write.csv(bd_sub, "bd_sub_after.csv")
 
@@ -325,7 +325,7 @@ bd_sub |>
 
 corr <- bd_sub |> 
   ungroup() |> 
-  select(where(is.numeric), -`RAIN_FALL(mm)_MEAN`, -`SNOW_FALL(cm)_MEAN`) |> 
+  select(where(is.numeric)) |> 
   cor()
 
 corr
@@ -338,25 +338,28 @@ The Scatterplot of Windspeed vs. Date seems to reveal slightly higher windspeeds
 
 The Scatterplot of RH over Date was somewhat surprising. There does not seem to be any seasonality present with RH in Seoul. The Boxplot of Daily Bike Rentals vs. Holiday clearly shows the bikes are used for getting to work.
 
-The Correlation Table indicates a positive correlation between Daily Bike Rentals and Temperature, Dew Point and Temperature. There is a strong positive correlation between Temperature and Dew Point Temperature. There seems to be a moderate postive correlation between Dew Point Temperature and Relative Humidity.
+The Correlation Table indicates a positive correlation between Daily Bike Rentals and Temperature, Dew Point Temperature and Solar Radiation. There is a strong positive correlation between Temperature and Dew Point Temperature. There seems to be a moderate positive correlation between Dew Point Temperature and Relative Humidity.
 
 ## Split the Data
 
-Use functions from tidymodels to split the data into a training and test set (75/25 split). Use the strata argument to stratify the split on the seasons variable. • On the training set, create a 10 fold CV split
+Use functions from tidymodels to split the data into a training and test set (75/25 split). Use the strata argument to stratify the split on the seasons variable. • On the training set, create a 10 fold CV split. 
+
+The code splits the dataset bd_sub into training and test sets using tidymodels in R. initial_split(bd_sub, prop = 3/4, strata = SEASONS): Splits bd_sub so that 75% goes to training and 25% to testing, while preserving the distribution of SEASONS.  
+
 
 ```{r}
 library(tidymodels)
 
 set.seed(222)
 # Put 3/4 of the data into the training set 
-data_split <- initial_split(bd_sub, prop = 3/4, strata = SEASONS)
+init_split <- initial_split(bd_sub, prop = 3/4, strata = SEASONS)
                
 # Create data frames for the two sets:
-bike_train_data <- training(data_split)
-bike_test_data  <- testing(data_split)
+bike_train_data <- training(init_split)
+bike_test_data  <- testing(init_split)
 
 #On the training set, create a 10 fold CV split
-bike_10_fold <- vfold_cv(bike_train, 10)
+bike_10_fold <- vfold_cv(bike_train_data, 10)
 
 ```
 
@@ -409,10 +412,10 @@ recipe2 <-
   step_rm(DATE_dow, DATE) |>
   step_normalize(all_numeric_predictors()) |>
   step_dummy(all_nominal_predictors()) |>
- step_interact(
+  step_interact(
   terms = ~ starts_with("HOLIDAY"):starts_with("SEASONS") +
            `TEMP(deg C)_MEAN`:starts_with("SEASONS") +
-           `TEMP(deg C)_MEAN`:`RAIN_FALL(mm)_MEAN`
+           `TEMP(deg C)_MEAN`:`SUM_RAIN_FALL(mm)`
 )
   
 recipe2_prep <- prep(recipe2, training = bike_train_data)
@@ -426,6 +429,7 @@ For the 3rd recipe:
 • Do the same as the 2nd recipe.  
 • Add in quadratic terms for each numeric predictor
 ```{r}
+#Define Recipe 3
 
 recipe3 <- 
   recipe(SUM_RBC ~ ., data = bike_train_data) |> 
@@ -440,8 +444,9 @@ recipe3 <-
   step_dummy(all_nominal_predictors()) |>
   step_interact(
   terms = ~ starts_with("HOLIDAY"):starts_with("SEASONS") +
-           `TEMP(deg C)_MEAN`:starts_with("SEASONS") +
-           `TEMP(deg C)_MEAN`:`RAIN_FALL(mm)_MEAN`) 
+           `TEMP(deg C)_MEAN_poly_1`:starts_with("SEASONS") +
+           `TEMP(deg C)_MEAN_poly_1`:`SUM_RAIN_FALL(mm)_poly_1`
+)
 
 recipe3_prep <- prep(recipe3, training = bike_train_data)
 recipe3_baked <- bake(recipe3_prep, new_data = bike_test_data)  
@@ -458,7 +463,9 @@ set_engine("lm")
 
 ### Fit Models using 10 fold CV via fit_resamples().
 
-Consider the training set CV error to choose a best model.  
+Consider the training set CV error to choose a best model.  fit_resamples() uses resampling (e.g., cross-validation, bootstrapping) to estimate model performance. Trains and evaluates the model on multiple splits of the training data. It is used for model selection, tuning, and understanding generalization.
+
+In tidymodels (R), workflow() creates a modeling workflow object that combines preprocessing (recipe or formula) and a model specification. It helps organize the steps of the machine learning pipeline.
 ```{r}
 
 bike_CV_fit1 <- workflow() |>
@@ -478,8 +485,9 @@ bike_CV_fit3 <- workflow() |>
 
 
 ```
+bike_CV_fit1,2,3 contain the results of cross-validation, using the workflow function.  I do not have a good answer as why I am getting warnings on rank-deficiency for Recipes 2 & 3. There is some collinearity in the interactions which is not jumping out at me.
 
-### Collect Metrics on the Models
+### Collect Metrics on the CV Models
 ```{r}
 
 rbind(bike_CV_fit1 |> collect_metrics(),
@@ -489,28 +497,38 @@ rbind(bike_CV_fit1 |> collect_metrics(),
 ```
 
 ### Fit Best Model to the Entire Training Set
-```{r}
-
-final_model |> workflow() |>
-  add_recipe(recipe 123) |>
-  add_model(bike_model)
-  last_fit(data_split) |>
-  collect_metrics()
-
-```
 
 ### Compute the RMSE on the Test Set
+
+Recipe 2 has the lowest RMSE, so I will use this to make the final model. last_fit() is for final model evaluation, not for tuning or resampling. It gives a realistic estimate of model performance on new data.
 ```{r}
 
-predictions <- predict(final_model, bike_test_data)
-RMSE(predictions, bike_test_data$SUM_RBC)
+final_model <- workflow() |>
+  add_recipe(recipe2) |>
+  add_model(bike_model) |>
+  last_fit(init_split)
 
+final_model |> collect_metrics()
 ```
+RMSE for Model 2 on the entire training set is 4953, which is a good sign because it is considerably lower than the RMSE from the Cross-Validation. 
 
 ### Obtain the Final Model Coefficient Table
 
 Use extract_fit_parsnip() and tidy().
 ```{r}
 
+final_model |> 
+  extract_fit_parsnip() |> 
+  tidy()
+
 ```
+From inspection of the p value column, we see the following parameters are statistically significant at the 5% significance level:  
+
+* `SUM_RAIN_FALL(mm)`
+* `SOL_RAD(MJ/m2)_MEAN`
+* SEASONS
+* DAY_TYPE
+* `SEASONS x_TEMP(deg C)_MEAN`
+
+
 
