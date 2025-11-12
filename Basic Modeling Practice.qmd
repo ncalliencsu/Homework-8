@@ -14,7 +14,8 @@ library(readr)
 library(lubridate)
 library(tidyverse)
 
-raw_data = read.csv("SeoulBikeData_mod.csv", check.names = F, header = TRUE)
+raw_data <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/SeoulBikeData.csv",
+                      locale = locale(encoding = "latin1"))
 
 ```
 
@@ -26,8 +27,7 @@ raw_data = read.csv("SeoulBikeData_mod.csv", check.names = F, header = TRUE)
 colSums(is.na(raw_data))
 ```
 
-**Narrative** The expression colSums(is.na(bike_data)) forms row and column sums and means for data frames. Here, there are no missing values, which checks with the website that there is no missing data.
-**End Narrative**
+The expression colSums(is.na(bike_data)) forms row and column sums and means for data frames. Here, there are no missing values, which checks with the website that there is no missing data.
 
 2.  Check the column types and the values within the columns to make sure they make sense (basic summary stats for numeric columns and check the unique values for the categorical variables).
 
@@ -62,7 +62,7 @@ cat("\n")
 
 ```
 
-**Narrative** The basic numeric summary above shows
+The basic numeric summary above shows:
 
 *Rented Bike Count* is approximately 700 / hour on average, with a standard deviation of 645, and a median of 505, which suggest that RBC is skewed right slightly.
 
@@ -78,13 +78,17 @@ cat("\n")
 
 *Dew Point Temperature* has a mean of 4 with a standard deviation of 13 and a median of 5, suggesting a fairly symmetrical distribution.
 
-*Solar Radiation* has a mean of 0.569 and sd of 0.868 and med of 0.01.  This is apparently a distribution that is highly skewed to the right.
+*Solar Radiation* has a mean of 0.569 and sd of 0.868 and med of 0.01. This is apparently a distribution that is highly skewed to the right.
 
-*Rainfall* shows a mean of 0.148 mm because many days there is no rainfall.  Is this an example of a zero inflated distribution?
+*Rainfall* shows a mean of 0.148 mm because many days there is no rainfall. Is this an example of a zero inflated distribution?
 
 *Snowfall* I think is similar because so many days there is no snowfall.
 
-**End Narrative**
+*Seasons* The season counts are fairly even so this variable looks fine. This is clealy a factor variable.
+
+*Holiday* Holiday is a binary variable, and should be a factor.
+
+*Functioning Day* is also a binary variable with Yes and No unique values.
 
 3.  Convert the Date column into an actual date (if need be). Recall the lubridate package.
 
@@ -103,11 +107,11 @@ bike_data <-
     DATE = `Date`,
     RBC = `Rented Bike Count`,
     HOUR = `Hour`,
-    "TEMP(deg C)" = `Temperature`,
+    "TEMP(deg C)" = `Temperature(°C)`,
     "RH(%)" = `Humidity(%)`,
     "WD_SPD(m/s)" = `Wind speed (m/s)`,
     "VIS(10m)" = `Visibility (10m)`,
-    "DP_TEMP(deg C)" = `Dew point temperature`,
+    "DP_TEMP(deg C)" = `Dew point temperature(°C)`,
     "SOL_RAD(MJ/m2)" = `Solar Radiation (MJ/m2)`,
     "RAIN_FALL(mm)" = `Rainfall(mm)`,
     "SNOW_FALL(cm)" = `Snowfall (cm)`,
@@ -125,17 +129,388 @@ bike_data <-
 write.csv(bike_data, "bike_data.csv")
 ```
 
-**Narrative** I had to remove the degrees symbol from the Temperature columns to rename the columns. I did that in Excel. I decided to use all caps for the names of the columns because of all the continuous variables, which I personally like to use abbreviations with capitals for continuous variables. I used dplyr and mutate to rename the columns with rename and to change date from character to date and the other character variables to factors.
+I decided to use all caps for the names of the columns because of all the continuous variables, which I personally like to use abbreviations with capitals for continuous variables. I used dplyr and mutate to rename the columns with rename and to change date from character to date and the other character variables to factors.
 
 6.  Create summary statistics (especially related to the bike rental count). These should be done across your categorical variables as well. You should notice something about the Functioning Day variable. Subset the data appropriately based on that.
+
 ```{r}
-#2-way Contingency Table for Holiday and Functioning Day
-cat("2-way Contingency Table for Holiday and Functioning Day", "\n")
-table(bike_data$HOLIDAY, bike_data$FUNC_DAY)
-cat("\n")
+
+cat("RBC Summary Statistics ", "\n")
+bike_data |>
+  summarize(min = min(RBC),  
+            q1 = quantile(RBC, 0.25),
+            median = median(RBC),
+            mean = mean(RBC),
+            stdev = sd(RBC),
+            q3 = quantile(RBC, 0.75),
+            max = max(RBC))
+
+cat("RBC by Season Summary Statistics ", "\n")
+bike_data |> 
+  select(RBC, SEASONS) |> 
+  group_by(SEASONS) |>
+  summarize(min = min(RBC),  #take inputs from a widget
+            q1 = quantile(RBC, 0.25),
+            median = median(RBC),
+            mean = mean(RBC),
+            stdev = sd(RBC),
+            q3 = quantile(RBC, 0.75),
+            max = max(RBC))
+
+cat("RBC by Holiday Summary Statistics ", "\n")
+bike_data |> 
+  select(RBC, HOLIDAY) |> 
+  group_by(HOLIDAY) |>
+  summarize(min = min(RBC),  #take inputs from a widget
+            q1 = quantile(RBC, 0.25),
+            median = median(RBC),
+            mean = mean(RBC),
+            stdev = sd(RBC),
+            q3 = quantile(RBC, 0.75),
+            max = max(RBC))
+
+cat("RBC Summary Statistics for Functioning Day = Yes ", "\n")
+bike_data |> 
+  filter(FUNC_DAY == "Yes") |>
+  summarize(min = min(RBC),  #take inputs from a widget
+            q1 = quantile(RBC, 0.25),
+            median = median(RBC),
+            mean = mean(RBC),
+            stdev = sd(RBC),
+            q3 = quantile(RBC, 0.75),
+            max = max(RBC))
+
+cat("Rainfall by Season Summary Statistics ", "\n")
+bike_data |> 
+  select(`RAIN_FALL(mm)`, SEASONS) |> 
+  group_by(SEASONS) |>
+  summarize(min = min(`RAIN_FALL(mm)`),  #take inputs from a widget
+            q1 = quantile(`RAIN_FALL(mm)`, 0.25),
+            median = median(`RAIN_FALL(mm)`),
+            mean = mean(`RAIN_FALL(mm)`),
+            stdev = sd(`RAIN_FALL(mm)`),
+            q3 = quantile(`RAIN_FALL(mm)`, 0.75),
+            max = max(`RAIN_FALL(mm)`))
+
+cat("Snowfall by Season Summary Statistics ", "\n")
+bike_data |> 
+  select(`SNOW_FALL(cm)`, SEASONS) |> 
+  group_by(SEASONS) |>
+  summarize(min = min(`SNOW_FALL(cm)`),  #take inputs from a widget
+            q1 = quantile(`SNOW_FALL(cm)`, 0.25),
+            median = median(`SNOW_FALL(cm)`),
+            mean = mean(`SNOW_FALL(cm)`),
+            stdev = sd(`SNOW_FALL(cm)`),
+            q3 = quantile(`SNOW_FALL(cm)`, 0.75),
+            max = max(`SNOW_FALL(cm)`))
+
+#Subset the Data by Functioning Day
+bd_sub <- 
+  bike_data |> 
+  filter(FUNC_DAY == "Yes")
+
+write.csv(bd_sub, "bd_sub_before.csv")
+
 ```
 
+The rented bike count seems to have some seasonality associated with it just by looking at the numbers. RBC seems to be lower for Holidays, which probably makes sense in an urban setting. There are no rented bikes on Functioning Day = No. I guess that means that bike rentals are not available on the weekends? Snow fall and rain fall by season summary statistics seem to make sense for the context.
 
 7.  To simplify our analysis, we’ll summarize across the hours so that each day has one observation associated with it. • (I’m using my new names here. Your names may not match and that’s ok!) Let’s group_by() the date, seasons, and holiday variables. • Find the sum of the bike_count, rainfall, and snowfall variables • Find the mean of all the weather related variables. • This will be our new data that we’ll analyze!
 
+```{r}
+
+bd_sub <- bike_data |> 
+  group_by(DATE, SEASONS, HOLIDAY) |>
+  summarise(across(where(is.numeric) , mean, na.rm = TRUE, .names = '{col}_MEAN'),
+            SUM_RBC = sum(RBC),
+            "SUM_RAIN_FALL(mm)" = sum(`RAIN_FALL(mm)`),
+            "SUM_SNOW_FALL(cm)" = sum(`SNOW_FALL(cm)`),) |>
+            select(DATE, SEASONS, HOLIDAY, starts_with("SUM"), everything(), -RBC_MEAN, -HOUR_MEAN)
+                        
+write.csv(bd_sub, "bd_sub_after.csv")
+
+```
+
+In the code block above I created the data set in the prompt using group_by, summarise and select to get the stats across hours, name the columns and then rearranged the columns.
+
 8.  Recreate your basic summary stats and then create some plots to explore relationships. Report correlation between your numeric variables as well.
+
+```{r Summary Statistics for Subset}
+
+cat("RBC by Season Summary Statistics for Subset ", "\n")
+bd_sub |> 
+  select(SUM_RBC, SEASONS) |> 
+  group_by(SEASONS) |>
+  summarize(min = min(SUM_RBC),  #take inputs from a widget
+            q1 = quantile(SUM_RBC, 0.25),
+            median = median(SUM_RBC),
+            mean = mean(SUM_RBC),
+            stdev = sd(SUM_RBC),
+            q3 = quantile(SUM_RBC, 0.75),
+            max = max(SUM_RBC))
+
+cat("RBC by Holiday Summary Statistics for Subset ", "\n")
+bd_sub |> 
+  select(SUM_RBC, HOLIDAY) |> 
+  group_by(HOLIDAY) |>
+  summarize(min = min(SUM_RBC),  #take inputs from a widget
+            q1 = quantile(SUM_RBC, 0.25),
+            median = median(SUM_RBC),
+            mean = mean(SUM_RBC),
+            stdev = sd(SUM_RBC),
+            q3 = quantile(SUM_RBC, 0.75),
+            max = max(SUM_RBC))
+
+cat("Rainfall by Season Summary Statistics for Subset ", "\n")
+bd_sub |> 
+  select(`SUM_RAIN_FALL(mm)`, SEASONS) |> 
+  group_by(SEASONS) |>
+  summarize(min = min(`SUM_RAIN_FALL(mm)`),  #take inputs from a widget
+            q1 = quantile(`SUM_RAIN_FALL(mm)`, 0.25),
+            median = median(`SUM_RAIN_FALL(mm)`),
+            mean = mean(`SUM_RAIN_FALL(mm)`),
+            stdev = sd(`SUM_RAIN_FALL(mm)`),
+            q3 = quantile(`SUM_RAIN_FALL(mm)`, 0.75),
+            max = max(`SUM_RAIN_FALL(mm)`))
+
+cat("Snowfall by Season Summary Statistics for Subset ", "\n")
+bd_sub |> 
+  select(`SUM_SNOW_FALL(cm)`, SEASONS) |> 
+  group_by(SEASONS) |>
+  summarize(min = min(`SUM_SNOW_FALL(cm)`),  #take inputs from a widget
+            q1 = quantile(`SUM_SNOW_FALL(cm)`, 0.25),
+            median = median(`SUM_SNOW_FALL(cm)`),
+            mean = mean(`SUM_SNOW_FALL(cm)`),
+            stdev = sd(`SUM_SNOW_FALL(cm)`),
+            q3 = quantile(`SUM_SNOW_FALL(cm)`, 0.75),
+            max = max(`SUM_SNOW_FALL(cm)`))
+```
+
+The summary statistics for RBC by season and holiday reveal the expected downturn in winter and the highest being the summer. Autumn and spring rentals are about the same. The summary statistics for RBC by Holiday shows clearly that working days dominate bike rentals. Seasonality in rainfall seems to be present, which is no surprise. The snowfall max in Autumn is higher than in Winter, that is a surprise.
+
+```{r Graphical Analysis for Subset}
+
+bd_sub |>
+  ggplot(aes(x=DATE, y=SUM_RBC)) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Scatterplot of Daily Bike Rentals vs. Date") 
+
+
+bd_sub |>
+  ggplot(aes(x=DATE, y=`WD_SPD(m/s)_MEAN`)) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Scatterplot of Wind Speed vs. Date") 
+
+bd_sub |>
+  ggplot(aes(x=DATE, y=`TEMP(deg C)_MEAN`)) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Scatterplot of Temperature vs. Date") 
+  
+bd_sub |>
+  ggplot(aes(x=DATE, y = `RH(%)_MEAN` )) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Scatterplot of RH vs. Date") 
+
+bd_sub |>
+  ggplot(aes(x = SEASONS, y = SUM_RBC , fill = SEASONS)) +
+  geom_boxplot() + labs(title = "Boxplot of Daily Bike Rentals by Season", x = "Seasons", y = "Daily Bike Rentals")
+
+bd_sub |>
+  ggplot(aes(x = HOLIDAY, y = SUM_RBC , fill = HOLIDAY)) +
+  geom_boxplot() + labs(title = "Boxplot of Daily Bike Rentals by Holiday", x = "Holiday", y = "Daily Bike Rentals")
+
+corr <- bd_sub |> 
+  ungroup() |> 
+  select(where(is.numeric), -`RAIN_FALL(mm)_MEAN`, -`SNOW_FALL(cm)_MEAN`) |> 
+  cor()
+
+corr
+
+```
+
+The Scatterplot of Daily Bike Rentals vs. Date reveals the seasonality we would expect, with peak demand in the summer and the lowest demand in the winter. There are some days where no rentals are present.
+
+The Scatterplot of Windspeed vs. Date seems to reveal slightly higher windspeeds in the winter and spring. The Scatterplot of Temperature vs. Date also seems to be as expected with seasonality.
+
+The Scatterplot of RH over Date was somewhat surprising. There does not seem to be any seasonality present with RH in Seoul. The Boxplot of Daily Bike Rentals vs. Holiday clearly shows the bikes are used for getting to work.
+
+The Correlation Table indicates a positive correlation between Daily Bike Rentals and Temperature, Dew Point and Temperature. There is a strong positive correlation between Temperature and Dew Point Temperature. There seems to be a moderate postive correlation between Dew Point Temperature and Relative Humidity.
+
+## Split the Data
+
+Use functions from tidymodels to split the data into a training and test set (75/25 split). Use the strata argument to stratify the split on the seasons variable. • On the training set, create a 10 fold CV split
+
+```{r}
+library(tidymodels)
+
+set.seed(222)
+# Put 3/4 of the data into the training set 
+data_split <- initial_split(bd_sub, prop = 3/4, strata = SEASONS)
+               
+# Create data frames for the two sets:
+bike_train_data <- training(data_split)
+bike_test_data  <- testing(data_split)
+
+#On the training set, create a 10 fold CV split
+bike_10_fold <- vfold_cv(bike_train, 10)
+
+```
+
+## Fitting MLR Models
+
+### First, Create Recipes.
+
+For the 1st recipe: • Let’s ignore the date variable for modeling (so we’ll need to remove that or give it a different ID) but use it to create a weekday/weekend (factor) variable. (See step 2 of the shinymodels tutorial! You can use step_date() then step_mutate() with a factor(if_else(...)) to create the variable. I then had to remove the intermediate variable created.)
+
+• Let’s standardize the numeric variables since their scales are pretty different.
+
+• Let’s create dummy variables for the seasons, holiday, and our new day type variable
+
+```{r}
+
+#Define Recipe 1
+recipe1 <- 
+  recipe(SUM_RBC ~ ., data = bike_train_data) |> 
+  step_date(DATE, features = c("dow")) |>              
+  step_mutate(
+    DAY_TYPE = factor(
+      ifelse(
+        DATE_dow == "Sat" | DATE_dow == "Sun", "WKEND", "WKDAY"))) |>
+  step_rm(DATE_dow, DATE) |>
+  step_normalize(all_numeric_predictors()) |>
+  step_dummy(all_nominal_predictors())
+
+
+recipe1_prep <- prep(recipe1, training = bike_train_data)
+recipe1_baked <- bake(recipe1_prep, new_data = bike_test_data)  
+ 
+write.csv(recipe1_baked, "recipe1_baked.csv")
+
+```
+
+For the 2nd recipe:  
+• Do the same steps as above.  
+• Add in interactions between seasons and holiday, seasons and temp, temp and rainfall. For the seasons interactions, you can use starts_with() to create the proper interactions.
+
+```{r}
+#Define Recipe 2
+
+recipe2 <- 
+  recipe(SUM_RBC ~ ., data = bike_train_data) |> 
+  step_date(DATE, features = c("dow")) |>              
+  step_mutate(
+    DAY_TYPE = factor(
+      ifelse(
+        DATE_dow == "Sat" | DATE_dow == "Sun", "WKEND", "WKDAY"))) |>
+  step_rm(DATE_dow, DATE) |>
+  step_normalize(all_numeric_predictors()) |>
+  step_dummy(all_nominal_predictors()) |>
+ step_interact(
+  terms = ~ starts_with("HOLIDAY"):starts_with("SEASONS") +
+           `TEMP(deg C)_MEAN`:starts_with("SEASONS") +
+           `TEMP(deg C)_MEAN`:`RAIN_FALL(mm)_MEAN`
+)
+  
+recipe2_prep <- prep(recipe2, training = bike_train_data)
+recipe2_baked <- bake(recipe2_prep, new_data = bike_test_data)  
+ 
+write.csv(recipe2_baked, "recipe2_baked.csv")
+
+```
+
+For the 3rd recipe:  
+• Do the same as the 2nd recipe.  
+• Add in quadratic terms for each numeric predictor
+```{r}
+
+recipe3 <- 
+  recipe(SUM_RBC ~ ., data = bike_train_data) |> 
+  step_date(DATE, features = c("dow")) |>              
+  step_mutate(
+    DAY_TYPE = factor(
+      ifelse(
+        DATE_dow == "Sat" | DATE_dow == "Sun", "WKEND", "WKDAY"))) |>
+  step_rm(DATE_dow, DATE) |>
+  step_normalize(all_numeric_predictors()) |>
+  step_poly(all_numeric_predictors(), degree = 2) |>
+  step_dummy(all_nominal_predictors()) |>
+  step_interact(
+  terms = ~ starts_with("HOLIDAY"):starts_with("SEASONS") +
+           `TEMP(deg C)_MEAN`:starts_with("SEASONS") +
+           `TEMP(deg C)_MEAN`:`RAIN_FALL(mm)_MEAN`) 
+
+recipe3_prep <- prep(recipe3, training = bike_train_data)
+recipe3_baked <- bake(recipe3_prep, new_data = bike_test_data)  
+ 
+write.csv(recipe3_baked, "recipe3_baked.csv")
+```
+
+### Set Up Linear Model Object  
+```{r}
+bike_model <- linear_reg() |>
+set_engine("lm")
+
+```
+
+### Fit Models using 10 fold CV via fit_resamples().
+
+Consider the training set CV error to choose a best model.  
+```{r}
+
+bike_CV_fit1 <- workflow() |>
+  add_recipe(recipe1) |>
+  add_model(bike_model) |>
+  fit_resamples(bike_10_fold)
+
+bike_CV_fit2 <- workflow() |>
+  add_recipe(recipe2) |>
+  add_model(bike_model) |>
+  fit_resamples(bike_10_fold)
+
+bike_CV_fit3 <- workflow() |>
+  add_recipe(recipe3) |>
+  add_model(bike_model) |>
+  fit_resamples(bike_10_fold)
+
+
+```
+
+### Collect Metrics on the Models
+```{r}
+
+rbind(bike_CV_fit1 |> collect_metrics(),
+      bike_CV_fit2 |> collect_metrics(),
+      bike_CV_fit3 |> collect_metrics())
+
+```
+
+### Fit Best Model to the Entire Training Set
+```{r}
+
+final_model |> workflow() |>
+  add_recipe(recipe 123) |>
+  add_model(bike_model)
+  last_fit(data_split) |>
+  collect_metrics()
+
+```
+
+### Compute the RMSE on the Test Set
+```{r}
+
+predictions <- predict(final_model, bike_test_data)
+RMSE(predictions, bike_test_data$SUM_RBC)
+
+```
+
+### Obtain the Final Model Coefficient Table
+
+Use extract_fit_parsnip() and tidy().
+```{r}
+
+```
+
